@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartFest — College Fest Coordination Platform</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ========================================================================
+       AUTH CONTAINER (LOGIN & REGISTRATION)
+       ======================================================================== -->
+  <div id="authContainer" style="display:none; min-height: 100vh; padding: 2rem 1.5rem; background: var(--bg-secondary);">
+    <div style="max-width: 480px; margin: 2rem auto; background: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-lg); padding: 2.25rem; box-shadow: var(--shadow-float);">
+      
+      <div style="text-align: center; margin-bottom: 1.75rem;">
+        <div style="width: 44px; height: 44px; background: linear-gradient(135deg, var(--accent-primary), #6366f1); color: white; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.35rem; font-weight: 800; margin-bottom: 0.75rem;">S</div>
+        <h1 style="font-size: 1.65rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.02em;">SmartFest Platform</h1>
+        <p style="font-size: 0.88rem; color: var(--text-secondary); margin-top: 0.25rem;">AI/ML-Based College Fest Coordination Platform</p>
+      </div>
+
+      <!-- Quick Demo Access Banner -->
+      <div class="demo-role-banner">
+        <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary);">⚡ Quick Demo Sign-In:</span>
+        <div class="demo-role-btns">
+          <button class="demo-btn" onclick="quickDemoLogin('anushka.student@smartfest.edu', 'Student@123')">Student</button>
+          <button class="demo-btn" onclick="quickDemoLogin('riya.coord@smartfest.edu', 'Coord@123')">Coordinator</button>
+          <button class="demo-btn" onclick="quickDemoLogin('admin@smartfest.edu', 'Admin@123')">Admin</button>
+        </div>
+      </div>
+
+      <!-- Login Form Tab -->
+      <div id="loginTab">
+        <form id="loginForm" onsubmit="handleManualLogin(event)">
+          <div class="form-group">
+            <label class="form-label">University Email</label>
+            <input type="email" id="loginEmail" class="form-input" required placeholder="user@smartfest.edu">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" id="loginPassword" class="form-input" required placeholder="••••••••">
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; height: 42px; margin-top: 0.75rem;">Sign In to SmartFest</button>
+        </form>
+
+        <p style="text-align: center; font-size: 0.82rem; color: var(--text-secondary); margin-top: 1.5rem;">
+          Don't have an account? <a href="#" style="color: var(--accent-primary); font-weight: 600;" onclick="toggleAuthTab('register')">Register here</a>
+        </p>
+      </div>
+
+      <!-- Registration Form Tab -->
+      <div id="registerTab" style="display:none;">
+        <form id="registerForm" onsubmit="handleManualRegister(event)">
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" id="regName" class="form-input" required placeholder="Anushka Sharma">
+          </div>
+          <div class="form-group">
+            <label class="form-label">University Email</label>
+            <input type="email" id="regEmail" class="form-input" required placeholder="student@smartfest.edu">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" id="regPassword" class="form-input" required placeholder="Minimum 6 characters">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+            <div class="form-group">
+              <label class="form-label">Role</label>
+              <select id="regRole" class="form-select">
+                <option value="student">Student</option>
+                <option value="coordinator">Event Coordinator</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Year of Study</label>
+              <input type="number" id="regYear" class="form-input" value="3" min="1" max="5">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Department</label>
+            <input type="text" id="regDept" class="form-input" required placeholder="Computer Science & Eng">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Interests (Comma-separated for AI suggestions)</label>
+            <input type="text" id="regInterests" class="form-input" placeholder="Coding, AI, Robotics, Gaming, Dance">
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; height: 42px; margin-top: 0.75rem;">Create My Account</button>
+        </form>
+
+        <p style="text-align: center; font-size: 0.82rem; color: var(--text-secondary); margin-top: 1.5rem;">
+          Already registered? <a href="#" style="color: var(--accent-primary); font-weight: 600;" onclick="toggleAuthTab('login')">Sign In</a>
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MAIN APPLICATION SHELL (AFTER AUTH)
+       ======================================================================== -->
+  <div id="appContainer" class="app-container" style="display:none;">
+
+    <!-- Top Navigation Bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button type="button" class="btn btn-ghost btn-icon-only mobile-toggle-btn" onclick="toggleMobileSidebar()" title="Toggle Navigation Menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+        <a href="#" class="brand-link">
+          <div class="brand-icon">S</div>
+          <span>SmartFest</span>
+        </a>
+        <span class="brand-badge">College Fest Platform</span>
+      </div>
+
+      <div class="topbar-right">
+        <!-- Notification Center Bell -->
+        <button class="btn btn-ghost btn-icon-only" onclick="openNotificationCenter()" title="Notifications" style="position: relative;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <span id="headerNotifBadge" style="display:none; position: absolute; top: 4px; right: 4px; width: 16px; height: 16px; border-radius: 999px; background: #ef4444; color: white; font-size: 0.65rem; font-weight: 800; align-items: center; justify-content: center;">0</span>
+        </button>
+
+        <!-- Light / Dark Mode Toggle -->
+        <button class="btn btn-ghost btn-icon-only" id="themeToggleBtn" title="Toggle Light/Dark Theme">
+          <svg id="themeSunIcon" style="display:none;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+          <svg id="themeMoonIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        </button>
+
+        <!-- User Chip -->
+        <div class="user-chip">
+          <div class="user-chip-avatar" id="headerUserAvatar">U</div>
+          <div>
+            <div id="headerUserName" style="font-weight: 700; line-height: 1.1;">User</div>
+            <div id="headerUserRole" style="font-size: 0.68rem; color: var(--accent-primary); font-weight: 700;">STUDENT</div>
+          </div>
+        </div>
+
+        <button class="btn btn-ghost" onclick="logout()" style="color: #ef4444;" title="Sign out">Log Out</button>
+      </div>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div id="sidebarNavGroups"></div>
+    </aside>
+
+    <!-- Main Content Views -->
+    <main class="main-wrapper">
+
+      <!-- ==================================================================
+           STUDENT VIEW: DASHBOARD
+           ================================================================== -->
+      <section id="view-student-dashboard" class="view-section active">
+        <h1 class="page-title">Welcome to SmartFest</h1>
+        <p class="page-subtitle">Your personalized hub for campus festival discovery, registrations, and digital passes.</p>
+
+        <!-- Metrics Row -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-value" id="studentMetricRegistered">0</div>
+            <div class="metric-label">My Registered Events</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="studentMetricRecommendations">0</div>
+            <div class="metric-label">AI Personalized Suggestions</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="studentMetricAvailable">0</div>
+            <div class="metric-label">Open Published Competitions</div>
+          </div>
+        </div>
+
+        <!-- AI Recommendations Carousel Section -->
+        <div style="margin-bottom: 2.25rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
+            <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;">
+              <span>✨ Recommended For You (AI/ML)</span>
+            </h2>
+            <button class="btn btn-ghost" style="font-size: 0.78rem;" onclick="switchView('view-recommendations')">View All Matches</button>
+          </div>
+          <div class="events-grid" id="studentRecCards"></div>
+        </div>
+
+        <!-- Featured Catalog Section -->
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
+            <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary);">All Fest Events</h2>
+            <button class="btn btn-ghost" style="font-size: 0.78rem;" onclick="switchView('view-browse-events')">Explore Full Catalog &rarr;</button>
+          </div>
+          <div class="events-grid" id="studentFeaturedGrid"></div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           STUDENT VIEW: BROWSE EVENTS
+           ================================================================== -->
+      <section id="view-browse-events" class="view-section">
+        <h1 class="page-title">Browse Fest Events</h1>
+        <p class="page-subtitle">Search competitions, workshops, and performances. Filter by genre and check real-time seat availability.</p>
+
+        <!-- Search Bar & Filters -->
+        <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap;">
+          <input type="text" id="browseSearchInput" class="search-bar-input" placeholder="Search by title, description, venue...">
+        </div>
+
+        <!-- Category Pills -->
+        <div class="filter-pills-row">
+          <button class="filter-pill active" data-category="all">All Genres</button>
+          <button class="filter-pill" data-category="Technical">Technical</button>
+          <button class="filter-pill" data-category="Cultural">Cultural</button>
+          <button class="filter-pill" data-category="Robotics">Robotics</button>
+          <button class="filter-pill" data-category="Gaming">Gaming</button>
+          <button class="filter-pill" data-category="Literary">Literary</button>
+        </div>
+
+        <div class="events-grid" id="browseEventsGrid"></div>
+      </section>
+
+      <!-- ==================================================================
+           STUDENT VIEW: MY REGISTRATIONS & QR PASSES
+           ================================================================== -->
+      <section id="view-my-registrations" class="view-section">
+        <h1 class="page-title">My Registered Events</h1>
+        <p class="page-subtitle">View your confirmed fest enrollments, retrieve digital gate passes, and submit post-event feedback.</p>
+
+        <div id="myRegistrationsList"></div>
+      </section>
+
+      <!-- ==================================================================
+           STUDENT VIEW: AI RECOMMENDATIONS
+           ================================================================== -->
+      <section id="view-recommendations" class="view-section">
+        <h1 class="page-title">AI/ML Event Recommendations</h1>
+        <p class="page-subtitle">Personalized suggestions generated via TF-IDF Vector Space matching and Cosine Similarity over your interest tags and academic profile.</p>
+
+        <div class="events-grid" id="aiRecommendationsGrid"></div>
+      </section>
+
+      <!-- ==================================================================
+           STUDENT VIEW: FEST SCHEDULE
+           ================================================================== -->
+      <section id="view-fest-schedule" class="view-section">
+        <h1 class="page-title">Fest Schedule & Venue Timetable</h1>
+        <p class="page-subtitle">Chronological timeline of all approved festival activities across campus auditoriums and halls.</p>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Time Window</th>
+                <th>Event Title & Genre</th>
+                <th>Assigned Venue</th>
+                <th>Event Coordinator</th>
+              </tr>
+            </thead>
+            <tbody id="festScheduleTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           COORDINATOR VIEW: MANAGED EVENTS
+           ================================================================== -->
+      <section id="view-coord-dashboard" class="view-section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+          <div>
+            <h1 class="page-title">Coordinator Event Workbench</h1>
+            <p class="page-subtitle">Draft events, assign venues, review participant enrollment, and submit proposals for administrative approval.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openCreateEventModal()">+ Create New Event</button>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Event Title</th>
+                <th>Category</th>
+                <th>Date & Time</th>
+                <th>Venue</th>
+                <th>Registrations</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="coordEventsTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           COORDINATOR VIEW: GATE CHECK-IN SCANNER
+           ================================================================== -->
+      <section id="view-coord-checkin" class="view-section">
+        <h1 class="page-title">Digital QR Event Gate Check-In</h1>
+        <p class="page-subtitle">Verify attendee admission passes at the door. Validates tokens, checks event belonging, and prevents duplicate check-ins.</p>
+
+        <div style="max-width: 640px; background: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 1.5rem; margin-top: 1.25rem;">
+          <div class="form-group">
+            <label class="form-label">Select Active Event</label>
+            <select id="scannerEventSelect" class="form-select"></select>
+          </div>
+
+          <!-- QR Scan Action Buttons -->
+          <div class="form-group" style="margin-top: 1rem;">
+            <label class="form-label">QR Scanning Options</label>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              <button type="button" id="toggleCameraScannerBtn" class="btn btn-primary" onclick="toggleCameraScanner()" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                <span id="cameraBtnLabel">Open Camera Scanner</span>
+              </button>
+              <button type="button" class="btn btn-ghost" onclick="document.getElementById('qrImageFileInput').click()" style="display: inline-flex; align-items: center; gap: 0.5rem; border: 1px solid var(--border-subtle);">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                Scan QR Image File
+              </button>
+              <input type="file" id="qrImageFileInput" accept="image/*" style="display: none;" onchange="handleQrFileUpload(event)">
+            </div>
+          </div>
+
+          <!-- Live Camera Viewport Container -->
+          <div id="qrCameraScannerBox" style="display: none; margin: 1.25rem 0; background: #0b0f19; border: 2px solid var(--accent-primary); border-radius: 12px; padding: 0.75rem; position: relative; overflow: hidden; text-align: center;">
+            <video id="qrVideo" playsinline style="width: 100%; max-height: 280px; object-fit: contain; border-radius: 8px; background: #000;"></video>
+            <canvas id="qrCanvas" style="display: none;"></canvas>
+            
+            <div id="qrScanOverlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 180px; height: 180px; border: 2px solid #22c55e; border-radius: 12px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45); pointer-events: none; overflow: hidden;">
+              <div style="position: absolute; width: 100%; height: 2px; background: #22c55e; animation: qrScanBeam 2s infinite ease-in-out; box-shadow: 0 0 8px #22c55e;"></div>
+            </div>
+
+            <div style="margin-top: 0.6rem; display: flex; justify-content: space-between; align-items: center; color: #e2e8f0; font-size: 0.8rem; padding: 0 0.5rem;">
+              <span id="qrScannerStatusText">Looking for student pass QR code...</span>
+              <button type="button" class="btn btn-ghost" onclick="stopCameraScanner()" style="padding: 3px 9px; font-size: 0.75rem; color: #ef4444; border: 1px solid #7f1d1d;">Stop Camera</button>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top: 1.25rem;">
+            <label class="form-label">Manual Pass Token Entry / Scanned Value</label>
+            <div style="display: flex; gap: 0.5rem;">
+              <input type="text" id="checkInTokenInput" class="form-input" placeholder="e.g. SF-U4-E1-17743292-XXXX">
+              <button class="btn btn-primary" onclick="executeCheckInVerification()">Verify Pass</button>
+            </div>
+            <p style="font-size: 0.75rem; color: var(--text-tertiary); margin-top: 0.35rem;">Use camera or image scanner above to auto-detect token, or enter manually.</p>
+          </div>
+
+          <div id="checkInResultBox" style="margin-top: 1.25rem;"></div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           COORDINATOR VIEW: ATTENDEE ROSTERS
+           ================================================================== -->
+      <section id="view-coord-rosters" class="view-section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+          <div>
+            <h1 class="page-title">Participant Rosters</h1>
+            <p class="page-subtitle">Inspect registered participants and export rosters as CSV spreadsheets.</p>
+          </div>
+          <button class="btn btn-primary" id="coordRosterDownloadBtn">📥 Export CSV Roster</button>
+        </div>
+
+        <div class="form-group" style="max-width: 450px;">
+          <label class="form-label">Select Event</label>
+          <select id="coordRosterEventSelect" class="form-select" onchange="fetchRosterForSelectedEvent()"></select>
+        </div>
+
+        <div class="table-container" style="margin-top: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; flex-wrap: wrap; gap: 0.5rem;">
+            <h3 id="coordRosterHeaderTitle" style="font-size: 1.1rem; font-weight: 700;">Enrolled Participants</h3>
+            <span id="coordRosterCountBadge" class="badge badge-published" style="display:none; font-size: 0.8rem; padding: 4px 10px;">0 Registered</span>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Student Name</th>
+                <th>Department & Year</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Registration Date</th>
+                <th>Admission Status</th>
+                <th>Pass Token</th>
+              </tr>
+            </thead>
+            <tbody id="coordRosterTableBody">
+              <tr>
+                <td colspan="7" style="text-align: center; color: var(--text-tertiary); padding: 2rem;">
+                  Select an event from the dropdown above to view registered participants.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           COORDINATOR VIEW: BROADCAST ANNOUNCEMENTS
+           ================================================================== -->
+      <section id="view-coord-broadcast" class="view-section">
+        <h1 class="page-title">Dispatch Broadcast Notification</h1>
+        <p class="page-subtitle">Send urgent updates, schedule delays, or announcements directly to participants.</p>
+
+        <div style="max-width: 550px; background: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 1.5rem; margin-top: 1.25rem;">
+          <form id="broadcastForm">
+            <div class="form-group">
+              <label class="form-label">Announcement Title</label>
+              <input type="text" id="bcTitle" class="form-input" required placeholder="e.g. Venue Shift: Hackathon">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Target Audience</label>
+              <select id="bcRole" class="form-select">
+                <option value="">All Users (Fest-Wide)</option>
+                <option value="student">Students Only</option>
+                <option value="coordinator">Coordinators Only</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Message Details</label>
+              <textarea id="bcMessage" class="form-textarea" rows="4" required placeholder="Provide clear instructions..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Dispatch Notification & Gateway Push</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           ADMINISTRATOR VIEW: APPROVAL QUEUE
+           ================================================================== -->
+      <section id="view-admin-approvals" class="view-section">
+        <h1 class="page-title">Event Approval Queue</h1>
+        <p class="page-subtitle">Evaluate event proposals submitted by coordinators. Verify venue suitability and publish campus-wide.</p>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Submitted Event</th>
+                <th>Category</th>
+                <th>Date & Time</th>
+                <th>Venue</th>
+                <th>Coordinator</th>
+                <th>Review Decisions</th>
+              </tr>
+            </thead>
+            <tbody id="adminApprovalsTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           ADMINISTRATOR VIEW: ANALYTICS & REPORTS
+           ================================================================== -->
+      <section id="view-admin-analytics" class="view-section">
+        <h1 class="page-title">Fest Analytics & Aggregate Reports</h1>
+        <p class="page-subtitle">Live SQL performance metrics, attendance statistics, and category popularity ratios.</p>
+
+        <!-- Analytics Metric Cards -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-value" id="analyticsTotalUsers">0</div>
+            <div class="metric-label">Total Registered Users</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="analyticsTotalEvents">0</div>
+            <div class="metric-label">Total Festival Events</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="analyticsTotalRegistrations">0</div>
+            <div class="metric-label">Total Enrollments</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="analyticsAttendanceRate">0%</div>
+            <div class="metric-label">Gate Attendance Rate</div>
+          </div>
+        </div>
+
+        <div style="background: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 1.5rem; margin-top: 1.5rem;">
+          <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem;">Category Popularity & Registration Distribution</h3>
+          <div id="analyticsCategoryBreakdown"></div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           ADMINISTRATOR VIEW: VENUE REGISTRY
+           ================================================================== -->
+      <section id="view-admin-venues" class="view-section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <div>
+            <h1 class="page-title">Campus Venue Registry</h1>
+            <p class="page-subtitle">Configure campus auditoriums, labs, and complexes with strict fire safety capacity limits.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('createVenueModal')">+ Add New Venue</button>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Venue Name</th>
+                <th>Campus Location</th>
+                <th>Capacity Limit</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="adminVenuesTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           ADMINISTRATOR VIEW: USER DIRECTORY
+           ================================================================== -->
+      <section id="view-admin-users" class="view-section">
+        <h1 class="page-title">User Account Directory</h1>
+        <p class="page-subtitle">Audit college user accounts, promote active students to Coordinator roles, and govern permissions.</p>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>User Name</th>
+                <th>Email Address</th>
+                <th>Department & Year</th>
+                <th>Role</th>
+                <th>Role Governance</th>
+              </tr>
+            </thead>
+            <tbody id="adminUsersTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ========================================================================
+       MODALS
+       ======================================================================== -->
+
+  <!-- Modal: Event Detail -->
+  <div class="modal-overlay" id="eventDetailModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title" id="edTitle">Event Details</h3>
+        <button class="modal-close-btn" onclick="closeModal('eventDetailModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
+          <span class="badge badge-blue" id="edCategory">Category</span>
+          <span class="badge badge-green" id="edCapacity">Seats Available</span>
+        </div>
+        <p id="edDescription" style="font-size: 0.95rem; line-height: 1.6; margin-bottom: 1rem; color: var(--text-secondary);"></p>
+        
+        <div style="background: var(--bg-secondary); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+          <div style="font-size: 0.85rem; margin-bottom: 0.35rem;">📅 <strong>Date & Time:</strong> <span id="edDate"></span></div>
+          <div style="font-size: 0.85rem; margin-bottom: 0.35rem;">📍 <strong>Venue Location:</strong> <span id="edVenue"></span></div>
+          <div style="font-size: 0.85rem;">👤 <strong>Event Lead:</strong> <span id="edCoordinator"></span></div>
+        </div>
+
+        <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.35rem;">Rules & Code of Conduct:</h4>
+        <pre id="edRules" style="font-family: inherit; font-size: 0.85rem; color: var(--text-secondary); background: var(--bg-tertiary); padding: 0.75rem; border-radius: 6px; white-space: pre-wrap; margin-bottom: 1rem;"></pre>
+
+        <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.35rem;">Eligibility:</h4>
+        <p id="edEligibility" style="font-size: 0.85rem; color: var(--text-secondary);"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('eventDetailModal')">Close</button>
+        <button class="btn btn-primary" id="edRegisterBtn">Register Now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Digital QR Gate Pass -->
+  <div class="modal-overlay" id="qrPassModal">
+    <div class="modal-box" style="max-width: 440px; text-align: center;">
+      <div class="modal-header">
+        <h3 class="modal-title">Digital Fest Admission Pass</h3>
+        <button class="modal-close-btn" onclick="closeModal('qrPassModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom: 1rem;">
+          <img id="qrModalImg" src="" alt="Gate QR Pass" style="width: 180px; height: 180px; border-radius: 8px; border: 1px solid var(--border-subtle); padding: 8px; background: white;">
+        </div>
+        <h4 id="qrModalEventTitle" style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">Event Title</h4>
+        <div id="qrModalStudentName" style="font-size: 0.95rem; font-weight: 600; color: var(--text-secondary); margin-top: 0.25rem;">Student Name</div>
+        <div id="qrModalDept" style="font-size: 0.8rem; color: var(--text-tertiary);">Department</div>
+        <div style="margin-top: 0.85rem;">
+          <span class="badge badge-green">✓ Confirmed Registration</span>
+        </div>
+        <div style="font-size: 0.75rem; color: var(--text-tertiary); margin-top: 1rem; word-break: break-all;">
+          Token: <code id="qrModalToken"></code>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Create Event (Coordinator) -->
+  <div class="modal-overlay" id="createEventModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">+ Author New Fest Event</h3>
+        <button class="modal-close-btn" onclick="closeModal('createEventModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="createEventForm">
+          <div class="form-group">
+            <label class="form-label">Event Title</label>
+            <input type="text" id="ceTitle" class="form-input" required placeholder="e.g. CyberSecurity CTF Challenge">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <select id="ceCategory" class="form-select">
+                <option value="Technical">Technical</option>
+                <option value="Cultural">Cultural</option>
+                <option value="Robotics">Robotics</option>
+                <option value="Gaming">Gaming</option>
+                <option value="Literary">Literary</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Target Venue</label>
+              <select id="ceVenue" class="form-select"></select>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem;">
+            <div class="form-group">
+              <label class="form-label">Event Date</label>
+              <input type="date" id="ceDate" class="form-input" required value="2026-11-26">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Start Time</label>
+              <input type="time" id="ceStartTime" class="form-input" required value="10:00">
+            </div>
+            <div class="form-group">
+              <label class="form-label">End Time</label>
+              <input type="time" id="ceEndTime" class="form-input" required value="13:00">
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1rem;">
+            <button type="button" class="btn btn-ghost" id="ceCheckConflictBtn" style="font-size: 0.75rem;">🔍 Check Venue Conflict</button>
+            <div id="ceConflictStatus" style="font-size: 0.8rem;"></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Max Seat Capacity</label>
+            <input type="number" id="ceCapacity" class="form-input" required value="50" min="5" max="1000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea id="ceDescription" class="form-textarea" rows="3" required placeholder="Describe the competition, goals, and perks..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Rules</label>
+            <textarea id="ceRules" class="form-textarea" rows="2" placeholder="Numbered rules..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Eligibility Criteria</label>
+            <input type="text" id="ceEligibility" class="form-input" placeholder="e.g. All university students">
+          </div>
+          <div class="modal-footer" style="padding: 1rem 0 0 0; background: transparent;">
+            <button type="button" class="btn btn-ghost" onclick="closeModal('createEventModal')">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Event Draft</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Create Venue (Admin) -->
+  <div class="modal-overlay" id="createVenueModal">
+    <div class="modal-box" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 class="modal-title">+ Add Campus Facility / Venue</h3>
+        <button class="modal-close-btn" onclick="closeModal('createVenueModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="createVenueForm">
+          <div class="form-group">
+            <label class="form-label">Venue Name</label>
+            <input type="text" id="cvName" class="form-input" required placeholder="e.g. ECE Seminar Hall 2">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Campus Location</label>
+            <input type="text" id="cvLocation" class="form-input" required placeholder="e.g. Science Block 3rd Floor">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Safety Capacity Limit</label>
+            <input type="number" id="cvCapacity" class="form-input" required value="100" min="10">
+          </div>
+          <div class="modal-footer" style="padding: 1rem 0 0 0; background: transparent;">
+            <button type="button" class="btn btn-ghost" onclick="closeModal('createVenueModal')">Cancel</button>
+            <button type="submit" class="btn btn-primary">Insert Venue</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Feedback -->
+  <div class="modal-overlay" id="feedbackModal">
+    <div class="modal-box" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Event Feedback</h3>
+        <button class="modal-close-btn" onclick="closeModal('feedbackModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="feedbackForm">
+          <input type="hidden" id="fbEventId">
+          <h4 id="fbEventTitle" style="font-size: 1.05rem; font-weight: 700; margin-bottom: 1rem;">Event Title</h4>
+          <div class="form-group">
+            <label class="form-label">Rating (1 to 5 Stars)</label>
+            <select id="fbRating" class="form-select">
+              <option value="5">⭐⭐⭐⭐⭐ 5 - Exceptional Experience</option>
+              <option value="4">⭐⭐⭐⭐ 4 - Good Event</option>
+              <option value="3">⭐⭐⭐ 3 - Average</option>
+              <option value="2">⭐⭐ 2 - Needs Improvement</option>
+              <option value="1">⭐ 1 - Poor Logistics</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Comments & Suggestions</label>
+            <textarea id="fbComments" class="form-textarea" rows="3" placeholder="Tell the coordinators what you enjoyed..."></textarea>
+          </div>
+          <div class="modal-footer" style="padding: 1rem 0 0 0; background: transparent;">
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Feedback</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: In-App Notification Center -->
+  <div class="modal-overlay" id="notificationModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Notification Center</h3>
+        <button class="modal-close-btn" onclick="closeModal('notificationModal')">✕</button>
+      </div>
+      <div class="modal-body" id="notifModalList" style="max-height: 450px; overflow-y: auto;"></div>
+    </div>
+  </div>
+
+  <!-- Manual Auth Tab Toggles & Handler Scripts -->
+  <script>
+    function toggleAuthTab(tab) {
+      if (tab === 'register') {
+        document.getElementById('loginTab').style.display = 'none';
+        document.getElementById('registerTab').style.display = 'block';
+      } else {
+        document.getElementById('loginTab').style.display = 'block';
+        document.getElementById('registerTab').style.display = 'none';
+      }
+    }
+
+    async function handleManualLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      await quickDemoLogin(email, password);
+    }
+
+    async function handleManualRegister(e) {
+      e.preventDefault();
+      const name = document.getElementById('regName').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const password = document.getElementById('regPassword').value;
+      const role = document.getElementById('regRole').value;
+      const year = parseInt(document.getElementById('regYear').value);
+      const department = document.getElementById('regDept').value.trim();
+      const interestsStr = document.getElementById('regInterests').value;
+      const interests = interestsStr ? interestsStr.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+      try {
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password, role, year, department, interests })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Registration failed');
+
+        localStorage.setItem('smartfest_token', data.access_token);
+        currentToken = data.access_token;
+        currentUser = data.user;
+        setupUserSession();
+        showToast(`Account created! Welcome, ${currentUser.name}!`);
+      } catch (err) {
+        alert('Registration error: ' + err.message);
+      }
+    }
+  </script>
+  <script src="/static/js/jsqr.min.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
